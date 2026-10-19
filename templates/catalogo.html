@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titulo %}Catalogo - Velvet Dolce{% endblock %}
+{% block contenido %}
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Cupcakes de <em>Red Velvet</em></h1>
+  <p>Reposteria artesanal hecha con amor. Pedidos en linea, entrega a domicilio.</p>
+  <div class="hero-botones">
+    <a href="#catalogo" class="btn btn-primario">Ver catalogo</a>
+    {% if not session.get('user_id') %}
+      <a href="{{ url_for('usuarios.login') }}" class="btn btn-contorno" style="color:#fff;border-color:rgba(255,255,255,.5)">Crear cuenta</a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- CUPO BANNER -->
+{% set disponibles = cupo.cupo_maximo - cupo.unidades_reservadas %}
+{% set pct = ((cupo.unidades_reservadas / cupo.cupo_maximo) * 100)|int %}
+<div class="cupo-banner">
+  <strong style="color:var(--rosa-d)">Cupo del dia:</strong>
+  <div class="cupo-barra-fondo">
+    <div class="cupo-barra-fill" style="width:{{ pct }}%;background:{% if pct >= 100 %}#dc2626{% elif pct > 75 %}#d97706{% else %}var(--verde){% endif %}"></div>
+  </div>
+  <span style="color:var(--gris)">{{ disponibles }} de {{ cupo.cupo_maximo }} disponibles</span>
+  {% if pct >= 100 %}
+    <span class="badge badge-cancelled">Agotado</span>
+  {% elif pct > 75 %}
+    <span class="badge badge-pending">Pocas unidades</span>
+  {% else %}
+    <span class="badge badge-ready">Disponible</span>
+  {% endif %}
+</div>
+
+<!-- CATALOGO -->
+<div class="contenedor" id="catalogo">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+    <h2>Nuestros Cupcakes</h2>
+    <div class="filtros">
+      <a href="/?cat=todos" class="filtro-btn {% if categoria=='todos' %}activo{% endif %}">Todos</a>
+      <a href="/?cat=clasico" class="filtro-btn {% if categoria=='clasico' %}activo{% endif %}">Clasico</a>
+      <a href="/?cat=especiales" class="filtro-btn {% if categoria=='especiales' %}activo{% endif %}">Especiales</a>
+      <a href="/?cat=temporada" class="filtro-btn {% if categoria=='temporada' %}activo{% endif %}">Temporada</a>
+    </div>
+  </div>
+
+  {% if not productos %}
+    <p style="color:var(--gris);padding:2rem 0">No hay productos en esta categoria.</p>
+  {% else %}
+  <div class="grid-productos">
+    {% for p in productos %}
+    <div class="producto-card {% if not p.disponible %}agotado{% endif %}">
+      {% if p.imagen and p.imagen != 'placeholder.png' %}
+        <img class="producto-img" src="{{ url_for('static', filename='img/productos/' + p.imagen) }}" alt="{{ p.nombre }}"/>
+      {% else %}
+        <div class="producto-img-placeholder">Sin imagen</div>
+      {% endif %}
+      <div class="producto-cuerpo">
+        <div class="producto-cat">{{ p.categoria }}</div>
+        <div class="producto-nombre">{{ p.nombre }}</div>
+        <div class="producto-desc">{{ p.descripcion }}</div>
+        <div class="producto-pie">
+          <span class="producto-precio">${{ "{:,}".format(p.precio) }}</span>
+          {% if p.disponible and pct < 100 %}
+            <form method="POST" action="{{ url_for('catalogo.agregar', pid=p.id) }}">
+              <button type="submit" class="btn btn-primario btn-chico">+ Agregar</button>
+            </form>
+          {% else %}
+            <span class="badge badge-cancelled">Agotado</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Registro - Velvet Dolce{% endblock %}
+{% block contenido %}
+<div class="contenedor-angosto">
+  <div class="auth-card">
+    <div class="auth-logo">Velvet <span>Dolce</span></div>
+    <p class="auth-sub">Crea tu cuenta</p>
+    <form method="POST" action="{{ url_for('usuarios.registro') }}">
+      <div class="grupo">
+        <label>Nombre completo</label>
+        <input class="input" type="text" name="nombre" placeholder="Tu nombre" required/>
+      </div>
+      <div class="grupo">
+        <label>Correo electronico</label>
+        <input class="input" type="email" name="correo" placeholder="tu@correo.com" required/>
+      </div>
+      <div class="grupo">
+        <label>Contrasena (min. 8 caracteres)</label>
+        <input class="input" type="password" name="contrasena" required/>
+      </div>
+      <div class="grupo">
+        <label>Confirmar contrasena</label>
+        <input class="input" type="password" name="contrasena2" required/>
+      </div>
+      <button type="submit" class="btn btn-primario btn-ancho">Crear cuenta</button>
+      <p style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--gris)">
+        Ya tienes cuenta? <a href="{{ url_for('usuarios.login') }}" style="color:var(--rosa)">Ingresar</a>
+      </p>
+    </form>
+  </div>
+</div>
+{% endblock %}

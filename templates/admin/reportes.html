@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block titulo %}Reportes - Admin{% endblock %}
+{% block contenido %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-titulo">Administracion</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-link">📊 Dashboard</a>
+    <a href="{{ url_for('admin.pedidos') }}" class="admin-link">📦 Pedidos</a>
+    <a href="{{ url_for('admin.productos') }}" class="admin-link">🧁 Productos</a>
+    <a href="{{ url_for('admin.cupo') }}" class="admin-link">⏱ Cupo Diario</a>
+    <a href="{{ url_for('admin.reportes') }}" class="admin-link activo">📈 Reportes</a>
+    <a href="{{ url_for('admin.auditoria') }}" class="admin-link">🔍 Auditoria</a>
+  </aside>
+  <div class="admin-contenido">
+    <div class="admin-titulo">Reportes de Ventas</div>
+    <div class="tarjeta">
+      <div class="tarjeta-titulo">Filtrar reporte</div>
+      <form method="GET" action="{{ url_for('admin.reportes') }}" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
+        <div class="grupo" style="margin:0">
+          <label>Fecha inicio</label>
+          <input class="input" type="date" name="desde" value="{{ desde }}"/>
+        </div>
+        <div class="grupo" style="margin:0">
+          <label>Fecha fin</label>
+          <input class="input" type="date" name="hasta" value="{{ hasta }}"/>
+        </div>
+        <button type="submit" class="btn btn-primario" name="accion" value="ver">Generar reporte</button>
+        <button type="submit" class="btn btn-primario" name="accion" value="pdf">Descargar PDF</button>
+        <button type="submit" class="btn btn-primario" name="accion" value="excel">Descargar excel</button>
+      </form>
+    </div>
+
+    {% if datos %}
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total pedidos</div><div class="stat-valor rosa">{{ datos.total }}</div></div>
+      <div class="stat-card"><div class="stat-label">Ingresos brutos</div><div class="stat-valor">${{ "{:,}".format(datos.brutos) }}</div></div>
+      <div class="stat-card"><div class="stat-label">Ingresos netos</div><div class="stat-valor">${{ "{:,}".format(datos.netos) }}</div></div>
+      <div class="stat-card"><div class="stat-label">Unidades vendidas</div><div class="stat-valor">{{ datos.unidades }}</div></div>
+    </div>
+    <div class="reporte-grid">
+      <div class="tarjeta">
+        <div class="tarjeta-titulo">Productos mas vendidos</div>
+        {% for p in datos.top %}
+        <div class="barra-item">
+          <div class="barra-label">{{ p.nombre }}</div>
+          <div class="barra-pista">
+            <div class="barra-fill" style="width:{{ ((p.total_uds / datos.max_uds) * 100)|int }}%"></div>
+          </div>
+          <div class="barra-val">{{ p.total_uds }} uds</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="tarjeta">
+        <div class="tarjeta-titulo">Pedidos por estado</div>
+        {% set max_cnt = datos.por_estado|map(attribute='cnt')|max %}
+        {% for e in datos.por_estado %}
+        <div class="barra-item">
+          <div class="barra-label">{{ e.estado }}</div>
+          <div class="barra-pista">
+            <div class="barra-fill" style="width:{{ ((e.cnt / max_cnt) * 100)|int }}%"></div>
+          </div>
+          <div class="barra-val">{{ e.cnt }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

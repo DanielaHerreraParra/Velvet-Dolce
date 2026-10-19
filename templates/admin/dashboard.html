@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Dashboard - Admin{% endblock %}
+{% block contenido %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-titulo">Administracion</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-link activo">📊 Dashboard</a>
+    <a href="{{ url_for('admin.pedidos') }}" class="admin-link">📦 Pedidos</a>
+    <a href="{{ url_for('admin.productos') }}" class="admin-link">🧁 Productos</a>
+    <a href="{{ url_for('admin.cupo') }}" class="admin-link">⏱ Cupo Diario</a>
+    <a href="{{ url_for('admin.reportes') }}" class="admin-link">📈 Reportes</a>
+    <a href="{{ url_for('admin.auditoria') }}" class="admin-link">🔍 Auditoria</a>
+  </aside>
+  <div class="admin-contenido">
+    <div class="admin-titulo">Dashboard</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Pedidos hoy</div><div class="stat-valor rosa">{{ pedidos_hoy }}</div></div>
+      <div class="stat-card"><div class="stat-label">Cupo restante</div><div class="stat-valor">{{ cupo.cupo_maximo - cupo.unidades_reservadas }}</div></div>
+      <div class="stat-card"><div class="stat-label">Ventas del dia</div><div class="stat-valor">${{ "{:,}".format(ventas_hoy) }}</div></div>
+      <div class="stat-card"><div class="stat-label">Clientes</div><div class="stat-valor">{{ clientes }}</div></div>
+    </div>
+    <div class="tarjeta">
+      <div class="tarjeta-titulo">Ultimos pedidos</div>
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Codigo</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <tbody>
+            {% for o in ultimos %}
+            <tr>
+              <td><strong>{{ o.codigo }}</strong></td>
+              <td>{{ o.nombre_completo }}</td>
+              <td>${{ "{:,}".format(o.total) }}</td>
+              <td><span class="badge {{ BADGES.get(o.estado,'') }}">{{ o.estado }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

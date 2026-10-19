@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block titulo %}Pedidos - Admin{% endblock %}
+{% block contenido %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-titulo">Administracion</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-link">Dashboard</a>
+    <a href="{{ url_for('admin.pedidos') }}" class="admin-link activo">Pedidos</a>
+    <a href="{{ url_for('admin.productos') }}" class="admin-link">Productos</a>
+    <a href="{{ url_for('admin.cupo') }}" class="admin-link">Cupo Diario</a>
+    <a href="{{ url_for('admin.reportes') }}" class="admin-link">Reportes</a>
+    <a href="{{ url_for('admin.auditoria') }}" class="admin-link">Auditoria</a>
+  </aside>
+  <div class="admin-contenido">
+    <div class="admin-titulo">
+      Gestion de Pedidos
+    </div>
+    <div class="tarjeta">
+      <form method="GET" style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem">
+        <input
+          class="input"
+          style="max-width:220px"
+          name="q"
+          value="{{ buscar }}"
+          placeholder="Buscar cliente o codigo..."
+        />
+        <select
+          class="input select-estado"
+          style="max-width:200px"
+          name="estado">
+          <option value="">Todos los estados</option>
+          {% for e in ESTADOS %}
+          <option {% if e==estado %}selected{% endif %}>
+            {{ e }}
+          </option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primario">
+          Buscar
+        </button>
+        <a href="{{ url_for('admin.pedidos') }}" class="btn btn-gris">
+          Limpiar
+        </a>
+      </form>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr><th>Codigo</th><th>Cliente</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Cambiar estado</th><th>Detalle</th></tr>
+          </thead>
+          <tbody>
+            {% for p in pedidos %}
+            <tr><td><strong>{{ p.codigo }}</strong></td><td>{{ p.nombre_completo }}</td><td>{{ p.fecha[:16] }}</td><td>${{ "{:,}".format(p.total) }}</td>
+              <td><span class="badge {{ BADGES.get(p.estado,'') }}">{{ p.estado }}</span></td>
+              <td><form
+                    method="POST"
+                    action="{{ url_for('admin.cambiar_estado', pid=p.id) }}"
+                    style="display:flex;gap:.4rem;align-items:center">
+                    <select
+                      class="select-estado"
+                      name="estado">
+                      {% for e in ESTADOS %}
+                      <option {% if e==p.estado %}selected{% endif %}>
+                        {{ e }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <button
+                      type="submit"
+                      class="btn btn-primario btn-chico">
+                      Guardar
+                    </button>
+                  </form>
+              </td>
+              <td><a href="{{ url_for('admin.detalle_pedido', pid=p.id) }}" class="btn btn-gris btn-chico">Ver</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% if pedido %}
+    <div class="tarjeta" style="margin-top:25px;">
+      <h2>Detalle del Pedido</h2>
+      <hr>
+      <p><strong>Código:</strong> {{ pedido.codigo }}</p>
+      <p><strong>Cliente:</strong> {{ pedido.nombre_completo }}</p>
+      <p><strong>Correo:</strong> {{ pedido.correo }}</p>
+      <p><strong>Fecha del pedido:</strong> {{ pedido.fecha }}</p>
+      <p>
+          <strong>Fecha de entrega:</strong>
+          {% if pedido.fecha_entrega %}
+              {{ pedido.fecha_entrega }}
+          {% else %}
+              <span style="color:#888;">Aún no asignada</span>
+          {% endif %}
+      </p>
+      <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+      
+      <br>
+      <table>
+        <thead>
+          <tr><th>Imagen</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>
+          {% for d in detalle %}
+          <tr>
+            <td><img src="{{ url_for('static', filename='uploads/' + d.imagen) }}" width="70"></td><td>{{ d.nombre }}</td><td>{{ d.cantidad }}</td><td>${{ "{:,}".format(d.precio_unitario) }}</td><td>${{ "{:,}".format(d.subtotal) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h3 style="margin-top:20px;">
+        Total:
+        ${{ "{:,}".format(pedido.total) }}
+      </h3>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

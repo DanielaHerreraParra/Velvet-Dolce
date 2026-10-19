@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block titulo %}Ingresar - Velvet Dolce{% endblock %}
+{% block contenido %}
+<div class="contenedor-angosto">
+  <div class="auth-card">
+    <div class="auth-logo">Velvet <span>Dolce</span></div>
+    <p class="auth-sub">Tu reposteria artesanal favorita</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab activo" onclick="
+        this.classList.add('activo');
+        document.getElementById('tab-reg').classList.remove('activo');
+        document.getElementById('form-login').style.display='block';
+        document.getElementById('form-reg').style.display='none';
+      ">Iniciar sesion</button>
+      <button class="auth-tab" id="tab-reg" onclick="
+        this.classList.add('activo');
+        document.querySelector('.auth-tab:first-child').classList.remove('activo');
+        document.getElementById('form-login').style.display='none';
+        document.getElementById('form-reg').style.display='block';
+      ">Registrarse</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <form method="POST" action="{{ url_for('usuarios.login') }}">
+        <div class="grupo">
+          <label>Correo electronico</label>
+          <input class="input" type="email" name="correo" placeholder="tu@correo.com" required/>
+        </div>
+        <div class="grupo">
+          <label>Contrasena</label>
+          <input class="input" type="password" name="contrasena" placeholder="Minimo 8 caracteres" required/>
+        </div>
+        <button type="submit" class="btn btn-primario btn-ancho">Ingresar</button>
+      </form>
+      <div class="auth-hint">
+        <strong>Cuentas de prueba:</strong><br>
+        Admin: admin@velvetdolce.com / admin1234<br>
+        Cliente: cliente@velvetdolce.com / cliente1234
+      </div>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="form-reg" style="display:none">
+      <form method="POST" action="{{ url_for('usuarios.registro') }}">
+        <div class="grupo">
+          <label>Nombre completo</label>
+          <input class="input" type="text" name="nombre" placeholder="Tu nombre" required/>
+        </div>
+        <div class="grupo">
+          <label>Correo electronico</label>
+          <input class="input" type="email" name="correo" placeholder="tu@correo.com" required/>
+        </div>
+        <div class="grupo">
+          <label>Contrasena (min. 8 caracteres)</label>
+          <input class="input" type="password" name="contrasena" required/>
+        </div>
+        <div class="grupo">
+          <label>Confirmar contrasena</label>
+          <input class="input" type="password" name="contrasena2" required/>
+        </div>
+        <button type="submit" class="btn btn-primario btn-ancho">Crear cuenta</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

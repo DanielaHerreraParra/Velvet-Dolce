@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}Cupo Diario - Admin{% endblock %}
+{% block contenido %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-titulo">Administracion</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-link">📊 Dashboard</a>
+    <a href="{{ url_for('admin.pedidos') }}" class="admin-link">📦 Pedidos</a>
+    <a href="{{ url_for('admin.productos') }}" class="admin-link">🧁 Productos</a>
+    <a href="{{ url_for('admin.cupo') }}" class="admin-link activo">⏱ Cupo Diario</a>
+    <a href="{{ url_for('admin.reportes') }}" class="admin-link">📈 Reportes</a>
+    <a href="{{ url_for('admin.auditoria') }}" class="admin-link">🔍 Auditoria</a>
+  </aside>
+  <div class="admin-contenido">
+    <div class="admin-titulo">Control de Cupo Diario</div>
+
+    {% set pct = ((cupo_hoy.unidades_reservadas / cupo_hoy.cupo_maximo) * 100)|int %}
+    <div class="tarjeta">
+      <div class="tarjeta-titulo">Estado de hoy ({{ cupo_hoy.fecha }})</div>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.4rem">
+        <span>Reservadas: <strong>{{ cupo_hoy.unidades_reservadas }}</strong></span>
+        <span>Disponibles: <strong>{{ cupo_hoy.cupo_maximo - cupo_hoy.unidades_reservadas }}</strong></span>
+        <span>Maximo: <strong>{{ cupo_hoy.cupo_maximo }}</strong></span>
+      </div>
+      <div class="cupo-grande-fondo">
+        <div class="cupo-grande-fill" style="width:{{ pct }}%"></div>
+      </div>
+      <p style="font-size:.8rem;color:var(--gris);margin-top:.4rem">{{ pct }}% del cupo utilizado hoy</p>
+    </div>
+
+    <div class="tarjeta">
+      <div class="tarjeta-titulo">Configurar cupo</div>
+      <form method="POST" style="max-width:420px">
+        <div class="grid-form-2">
+          <div class="grupo">
+            <label>Cupo maximo (150 - 200)</label>
+            <input class="input" type="number" name="cupo_maximo" min="150" max="200" value="{{ cupo_hoy.cupo_maximo }}" required/>
+          </div>
+          <div class="grupo">
+            <label>Fecha</label>
+            <input class="input" type="date" name="fecha" required/>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primario">Guardar</button>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <div class="tarjeta-titulo">Historial de cupos</div>
+      <div class="tabla-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Maximo</th><th>Reservadas</th><th>Disponibles</th><th>Ocupacion</th></tr></thead>
+          <tbody>
+            {% for h in historial %}
+            {% set p2 = ((h.unidades_reservadas / h.cupo_maximo) * 100)|int %}
+            <tr>
+              <td>{{ h.fecha }}</td>
+              <td>{{ h.cupo_maximo }}</td>
+              <td>{{ h.unidades_reservadas }}</td>
+              <td>{{ h.cupo_maximo - h.unidades_reservadas }}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:.5rem">
+                  <div style="width:70px;height:6px;background:#ddd;border-radius:3px;overflow:hidden">
+                    <div style="width:{{ p2 }}%;height:100%;background:{% if p2>=100 %}#dc2626{% elif p2>75 %}#d97706{% else %}var(--verde){% endif %}"></div>
+                  </div>
+                  <span style="font-size:.78rem">{{ p2 }}%</span>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

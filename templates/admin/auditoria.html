@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titulo %}Auditoria - Admin{% endblock %}
+{% block contenido %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-titulo">Administracion</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-link">📊 Dashboard</a>
+    <a href="{{ url_for('admin.pedidos') }}" class="admin-link">📦 Pedidos</a>
+    <a href="{{ url_for('admin.productos') }}" class="admin-link">🧁 Productos</a>
+    <a href="{{ url_for('admin.cupo') }}" class="admin-link">⏱ Cupo Diario</a>
+    <a href="{{ url_for('admin.reportes') }}" class="admin-link">📈 Reportes</a>
+    <a href="{{ url_for('admin.auditoria') }}" class="admin-link activo">🔍 Auditoria</a>
+  </aside>
+  <div class="admin-contenido">
+    <div class="admin-titulo">Registro de Auditoria</div>
+    <div class="tarjeta">
+      <form method="GET" style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem">
+        <select class="input" style="max-width:170px" name="tipo">
+          <option value="">Todos los tipos</option>
+          <option {% if tipo=='crear' %}selected{% endif %}>crear</option>
+          <option {% if tipo=='editar' %}selected{% endif %}>editar</option>
+          <option {% if tipo=='eliminar' %}selected{% endif %}>eliminar</option>
+          <option {% if tipo=='acceso' %}selected{% endif %}>acceso</option>
+        </select>
+        <input class="input" style="max-width:200px" name="usuario" value="{{ usuario }}" placeholder="Filtrar por usuario..."/>
+        <button type="submit" class="btn btn-primario">Filtrar</button>
+        <a href="{{ url_for('admin.auditoria') }}" class="btn btn-gris">Limpiar</a>
+      </form>
+
+      {% set iconos = {'crear':'➕','editar':'✏️','eliminar':'🗑️','acceso':'🔐'} %}
+      {% if not logs %}
+        <p style="color:var(--gris)">Sin registros para este filtro.</p>
+      {% else %}
+        {% for log in logs %}
+        <div class="audit-fila">
+          <div class="audit-icono audit-{{ log.tipo }}">{{ iconos.get(log.tipo, '•') }}</div>
+          <div>
+            <div class="audit-accion">{{ log.accion }}</div>
+            <div class="audit-meta">👤 {{ log.usuario }} &nbsp;·&nbsp; 🖥 {{ log.ip }} &nbsp;·&nbsp; 🕐 {{ log.fecha }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

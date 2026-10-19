@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Mis Pedidos - Velvet Dolce{% endblock %}
+{% block contenido %}
+<div class="contenedor" style="max-width:750px">
+  <h1>Mis Pedidos</h1>
+
+  {% if not pedidos %}
+    <div style="text-align:center;padding:3rem;color:var(--gris)">
+      <p style="margin-bottom:1rem">No tienes pedidos aun.</p>
+      <a href="{{ url_for('catalogo.index') }}" class="btn btn-primario">Hacer mi primer pedido</a>
+    </div>
+  {% else %}
+    {% for p in pedidos %}
+    {% set idx = pasos.index(p.estado) if p.estado in pasos else -1 %}
+    <div class="pedido-card">
+      <div class="pedido-cabeza">
+        <div>
+          <div class="pedido-codigo">{{ p.codigo }}</div>
+          <div class="pedido-fecha">{{ p.fecha[:16] }} &nbsp;·&nbsp; Entrega: {{ p.fecha_entrega or 'No definida' }}</div>
+        </div>
+        <span class="badge {{ BADGES.get(p.estado, '') }}">{{ p.estado }}</span>
+      </div>
+      <div class="timeline">
+        {% for paso in pasos %}
+        {% set i = loop.index0 %}
+        <div class="timeline-paso">
+          <div class="timeline-punto {% if i < idx %}hecho{% elif i == idx %}activo{% endif %}">
+            {% if i < idx %}✓{% else %}{{ i + 1 }}{% endif %}
+          </div>
+          <div class="timeline-label">{{ paso }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="pedido-items">{{ p.items_str or 'Sin detalle' }}</div>
+      <div class="pedido-total">Total: ${{ "{:,}".format(p.total) }}</div>
+      {% if p.notas %}
+        <div style="font-size:.8rem;color:var(--gris);margin-top:.3rem">Nota: {{ p.notas }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

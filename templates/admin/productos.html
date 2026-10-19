@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block titulo %}Productos - Admin{% endblock %}
+{% block contenido %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-titulo">Administracion</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-link">📊 Dashboard</a>
+    <a href="{{ url_for('admin.pedidos') }}" class="admin-link">📦 Pedidos</a>
+    <a href="{{ url_for('admin.productos') }}" class="admin-link activo">🧁 Productos</a>
+    <a href="{{ url_for('admin.cupo') }}" class="admin-link">⏱ Cupo Diario</a>
+    <a href="{{ url_for('admin.reportes') }}" class="admin-link">📈 Reportes</a>
+    <a href="{{ url_for('admin.auditoria') }}" class="admin-link">🔍 Auditoria</a>
+  </aside>
+  <div class="admin-contenido">
+    <div class="admin-titulo">Gestion de Productos</div>
+
+    <!-- FORMULARIO NUEVO PRODUCTO -->
+    <div class="tarjeta">
+      <div class="tarjeta-titulo">➕ Agregar nuevo producto</div>
+      <form method="POST" action="{{ url_for('admin.nuevo_producto') }}" enctype="multipart/form-data">
+        <div class="grid-form-2">
+          <div class="grupo">
+            <label>Nombre del producto</label>
+            <input class="input" type="text" name="nombre" placeholder="Ej. Red Velvet Clasico" required/>
+          </div>
+          <div class="grupo">
+            <label>Precio (COP)</label>
+            <input class="input" type="number" name="precio" placeholder="12000" required/>
+          </div>
+          <div class="grupo">
+            <label>Categoria</label>
+            <select class="input" name="categoria">
+              <option value="clasico">Clasico</option>
+              <option value="especiales">Especiales</option>
+              <option value="temporada">Temporada</option>
+            </select>
+          </div>
+          <div class="grupo">
+            <label>Imagen (PNG o JPG, max 4MB)</label>
+            <input class="input-archivo" type="file" name="imagen" accept=".png,.jpg,.jpeg"/>
+            <span class="nota-form">Si no subes imagen se mostrara un placeholder</span>
+          </div>
+          <div class="grupo span-2">
+            <label>Descripcion</label>
+            <input class="input" type="text" name="descripcion" placeholder="Descripcion corta del producto"/>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primario">Agregar producto</button>
+      </form>
+    </div>
+
+    <!-- LISTA DE PRODUCTOS -->
+    <div class="tarjeta">
+      <div class="tarjeta-titulo">Productos actuales</div>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Categoria</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in productos %}
+            <tr>
+              <td>
+                <div class="prod-mini">
+                  {% if p.imagen and p.imagen != 'placeholder.png' %}
+                    <img class="prod-mini-img" src="{{ url_for('static', filename='img/productos/' + p.imagen) }}" alt="{{ p.nombre }}"/>
+                  {% else %}
+                    <div class="prod-mini-img" style="display:flex;align-items:center;justify-content:center;background:var(--rosa-l);font-size:.65rem;color:var(--rosa)">Sin img</div>
+                  {% endif %}
+                  <strong>{{ p.nombre }}</strong>
+                </div>
+              </td>
+              <td>{{ p.categoria }}</td>
+              <td>${{ "{:,}".format(p.precio) }}</td>
+              <td>
+                {% if p.disponible %}
+                  <span class="badge badge-ready">Disponible</span>
+                {% else %}
+                  <span class="badge badge-cancelled">Agotado</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="acciones">
+                  <!-- Boton editar abre un form de edicion inline -->
+                  <button class="btn btn-gris btn-chico"
+                    onclick="
+                      var f=document.getElementById('edit-{{ p.id }}');
+                      f.style.display = f.style.display==='none' ? 'table-row' : 'none';
+                    ">Editar</button>
+                  <form method="POST" action="{{ url_for('admin.toggle_producto', pid=p.id) }}" style="display:inline">
+                    <button type="submit" class="btn btn-gris btn-chico">
+                      {% if p.disponible %}Desactivar{% else %}Activar{% endif %}
+                    </button>
+                  </form>
+                  <form method="POST" action="{{ url_for('admin.eliminar_producto', pid=p.id) }}" style="display:inline"
+                        onsubmit="return confirm('Eliminar {{ p.nombre }}?')">
+                    <button type="submit" class="btn btn-peligro btn-chico">Eliminar</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <!-- FILA DE EDICION -->
+            <tr id="edit-{{ p.id }}" style="display:none;background:var(--rosa-l)">
+              <td colspan="5" style="padding:1rem">
+                <form method="POST" action="{{ url_for('admin.editar_producto', pid=p.id) }}" enctype="multipart/form-data">
+                  <div class="grid-form-2">
+                    <div class="grupo">
+                      <label>Nombre</label>
+                      <input class="input" type="text" name="nombre" value="{{ p.nombre }}" required/>
+                    </div>
+                    <div class="grupo">
+                      <label>Precio</label>
+                      <input class="input" type="number" name="precio" value="{{ p.precio }}" required/>
+                    </div>
+                    <div class="grupo">
+                      <label>Categoria</label>
+                      <select class="input" name="categoria">
+                        <option value="clasico" {% if p.categoria=='clasico' %}selected{% endif %}>Clasico</option>
+                        <option value="especiales" {% if p.categoria=='especiales' %}selected{% endif %}>Especiales</option>
+                        <option value="temporada" {% if p.categoria=='temporada' %}selected{% endif %}>Temporada</option>
+                      </select>
+                    </div>
+                    <div class="grupo">
+                      <label>Nueva imagen (dejar vacio para conservar la actual)</label>
+                      <input class="input-archivo" type="file" name="imagen" accept=".png,.jpg,.jpeg"/>
+                    </div>
+                    <div class="grupo span-2">
+                      <label>Descripcion</label>
+                      <input class="input" type="text" name="descripcion" value="{{ p.descripcion or '' }}"/>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-verde">Guardar cambios</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
